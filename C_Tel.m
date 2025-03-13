@@ -9,15 +9,16 @@ function [X] = bits_to_2PAM(b)
         end
     end
 end
+
 %C.1
 N = 100;
+
+b = (sign(randn(N, 1)) + 1)/2;
 
 T = 10^(-3);
 over = 10;
 a = 0.5;
 A = 4;
-
-b = (sign(randn(N, 1)) + 1)/2;
 
 
 %C.2 1 Call the function
