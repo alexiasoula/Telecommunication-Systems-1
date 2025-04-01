@@ -1,35 +1,4 @@
 clear all; close all; clc
-%Function for A.2
-function [X] = bits_to_2PAM(n)
-    b = (sign(randn(n, 1)) + 1)/2;
-    for i = 1 : n
-        if b(i) == 0
-            X(i) = 1;
-        else 
-            X(i) = -1;
-        end
-    end
-end
-%Function for A.4
-function [X] = bits_to_4PAM(n)
-    b1 = (sign(randn(n, 1)) + 1)/2;
-    b2 = (sign(randn(n, 1)) + 1)/2;
-
-    bString = strcat(num2str(b2),num2str(b1));
-    b = str2num(bString);
-
-    for i = 1 : n
-        if b(i) == 00
-            X(i) = 3;
-        elseif b(i) == 01
-            X(i) = 1;
-        elseif b(i) == 11
-            X(i) = -1;
-        else
-            X(i) = -3;
-        end
-    end
-end
 
 %A1
 T= 10^(-2);
@@ -49,12 +18,9 @@ PHI = fftshift(fft(phi,Nf))*Ts;
 XF_abs = abs(PHI);
 PHI_psd = XF_abs.^2;
 
-figure(Name="A.1");
-semilogy(F_axis,PHI_psd);
-grid on;
-title("Power Spectral Denstity");
-xlabel('Frequency');
-ylabel('Amplitude');
+figure(Name="A.1")
+DrawSeminology(F_axis,PHI_psd, ...
+    "Power Spectral Denstity",'Frequency','Amplitude');
 
 %A.2
 N = 100;
@@ -72,37 +38,22 @@ t_delta = [0 : Ts : (N * T) - Ts];
 
 X_t = conv(X_delta,phi)*Ts;
 t_conv = t(1)+t_delta(1):Ts:t(end)+t_delta(end);
-
-figure(Name="A.2 Conv");
-plot(t_conv,X_t,'r');
-grid on;
-title("Signal X(t)");
-xlabel('Time');
-ylabel('Amplitude');
+figure(Name="A.2 Conv")
+DrawPlot(t_conv,X_t,"Signal X(t)", ...
+    "Time","Amplitude");
 
 S_x = (var(X)/T)*PHI_psd;
 
 %A.3
-X_F = fftshift(fft(X_t,Nf))*Ts;
-
-T_total = max(t_conv)- min(t_conv)+1;
-
-Px_F = (abs(X_F)).^2 / T_total;
+Px_F = calculateP(X_t,Nf,Ts,t_conv);
 
 figure(Name="A.3 P_x(F)");
 subplot(2,1,1);
-plot(F_axis,Px_F);
-grid on;
-title("Px(F) of signal X(t)");
-xlabel('Frequency');
-ylabel('Amplitude');
+DrawPlot(F_axis,Px_F,"Px(F) of signal X(t)",'Frequency','Amlitude');
 
 subplot(2,1,2);
-semilogy(F_axis,Px_F);
-grid on;
-title("Px(F) of signal X(t) [semilogy]");
-xlabel('Frequency');
-ylabel('Amplitude');
+DrawSeminology(F_axis,Px_F,"Px(F) of signal X(t) [semilogy]", ...
+    'Frequency','Amlitude');
 
 k=500;
 
@@ -111,9 +62,7 @@ for i=1:k
     X_test = bits_to_2PAM(N);
     X_delta_test = 1/Ts*upsample(X_test, over);
     X_t_test = conv(X_delta_test,phi)*Ts;
-    X_F_test = fftshift(fft(X_t_test,Nf))*Ts;
-    XF_abs_test = abs(X_F_test);
-    XF_psd_test = XF_abs_test.^2;
+    XF_psd_test = calculateP(X_t,Nf,Ts,1);
     X_tests(i,:)=XF_psd_test;
 end
 
@@ -131,4 +80,44 @@ ylabel('Amplitude');
 legend("Theoretical","Tests");
 
 %A.4
-X4 = 
+X4 = bits_to_4PAM(N/2);
+X4_delta = 1/Ts*upsample(X, over);
+t4_delta = [0 : Ts : N/2 * T - Ts];
+X4_t = conv(X_delta,phi)*Ts;
+t4_conv = linspace(t(1)+t4_delta(1),t(end)+t4_delta(end),)
+%t4_conv = t(1)+t4_delta(1):Ts:t(end)+t4_delta(end);
+
+figure(Name="A.4 Conv")
+DrawPlot(t4_conv,X4_t,"Singal X(t)","Time","Amlitude");
+
+Px_F4 = calculateP(X4_t,Nf,Ts,t4_conv);
+
+figure(Name="A.4 Px(f)")
+DrawSeminology(F_axis,Px_F4,"Px(F) of signal X(t)", ...
+    'Frequency','Amplitude');
+
+k=500;
+
+X_tests4 = zeros(k,Nf);
+for i=1:k
+    X_test4 = bits_to_4PAM(N/2);
+    X_delta_test4 = 1/Ts*upsample(X_test4, over);
+    X_t_test4 = conv(X_delta_test4,phi)*Ts;
+    XF_psd_test = calculateP(X_t_test4,Nf,Ts,1);
+    X_tests4(i,:)=XF_psd_test4;
+end
+
+Sx_tests4 = mean(X_tests4);
+S_x4 = (var(X4)/T)*PHI_psd;
+
+figure(Name="A.4 Theoretical - Tests");
+semilogy(F_axis,S_x4,'r');
+hold on;
+DrawSeminology(F_axis,Sx_tests4,"Power Spectral Density", ...
+    "Frequency","Amlitude")
+semilogy(F_axis,Sx_tests4,'r');
+hold off;
+legend("Theoretical","Tests");
+
+
+
