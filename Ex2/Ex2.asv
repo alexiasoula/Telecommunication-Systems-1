@@ -7,42 +7,14 @@ Ts = T/over;
 A=4;
 a=0.5;
 
-[phi,t] = srrc_pulse(T,over,A,a);
-
 Nf=2048;
 Fs = 1/Ts;
-f_axis = linspace(-Fs/2,Fs/2-Fs/Nf,Nf);
-F_axis = Fs*f_axis;
 
-PHI = fftshift(fft(phi,Nf))*Ts;
-XF_abs = abs(PHI);
-PHI_psd = XF_abs.^2;
-
-figure(Name="A.1")
-DrawSeminology(F_axis,PHI_psd, ...
-    "Power Spectral Denstity",'Frequency','Amplitude');
+[phi, t, PHI_psd, F_axis] = A1(T,over,A,a,Fs,Nf,Ts);
 
 %A.2
 N = 100;
-X = bits_to_2PAM(N);
-
-figure(Name="A.2 bits to 2 PAM");
-stem(X);
-grid on;
-title("Bits to 2PAM");
-xlabel('Time');
-ylabel('Amplitude');
-
-X_delta = 1/Ts*upsample(X, over);
-t_delta = [0 : Ts : (N * T) - Ts];
-
-X_t = conv(X_delta,phi)*Ts;
-t_conv = t(1)+t_delta(1):Ts:t(end)+t_delta(end);
-figure(Name="A.2 Conv")
-DrawPlot(t_conv,X_t,"Signal X(t)", ...
-    "Time","Amplitude");
-
-S_x = (var(X)/T)*PHI_psd;
+[ , X_t, t_conv, S_x] = A2(N,over,T,Ts,phi,t,PHI_psd);
 
 %A.3
 Px_F = calculateP(X_t,Nf,Ts,t_conv);
@@ -84,7 +56,7 @@ X4 = bits_to_4PAM(N/2);
 X4_delta = 1/Ts*upsample(X, over);
 t4_delta = [0 : Ts : N/2 * T - Ts];
 X4_t = conv(X_delta,phi)*Ts;
-t4_conv = linspace(t(1)+t4_delta(1),t(end)+t4_delta(end),)
+t4_conv = linspace(t(1)+t4_delta(1),t(end)+t4_delta(end),length(X4_t));
 %t4_conv = t(1)+t4_delta(1):Ts:t(end)+t4_delta(end);
 
 figure(Name="A.4 Conv")
@@ -103,7 +75,7 @@ for i=1:k
     X_test4 = bits_to_4PAM(N/2);
     X_delta_test4 = 1/Ts*upsample(X_test4, over);
     X_t_test4 = conv(X_delta_test4,phi)*Ts;
-    XF_psd_test = calculateP(X_t_test4,Nf,Ts,1);
+    XF_psd_test4 = calculateP(X_t_test4,Nf,Ts,1);
     X_tests4(i,:)=XF_psd_test4;
 end
 
@@ -111,13 +83,10 @@ Sx_tests4 = mean(X_tests4);
 S_x4 = (var(X4)/T)*PHI_psd;
 
 figure(Name="A.4 Theoretical - Tests");
-semilogy(F_axis,S_x4,'r');
+semilogy(F_axis,S_x4);
 hold on;
 DrawSeminology(F_axis,Sx_tests4,"Power Spectral Density", ...
     "Frequency","Amlitude")
-semilogy(F_axis,Sx_tests4,'r');
 hold off;
 legend("Theoretical","Tests");
-
-
 
