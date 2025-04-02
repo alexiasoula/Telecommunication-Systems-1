@@ -3,22 +3,22 @@ clear all; close all; clc
 %A1
 T= 10^(-2);
 over = 10;
-Ts = T/over;
+Ts = T/over; 
 A=4;
 a=0.5;
 
 Nf=2048;
 Fs = 1/Ts;
 
-[phi, t, PHI_psd, F_axis] = A1(T,over,A,a,Fs,Nf,Ts);
+[phi, t, PHI_psd, F_axis] = A1(T,over,A,a,Fs,Nf);
 
 %A.2
 N = 100;
-[X,X_delta,t_delta, X_t, t_conv, S_x] = A2(N,over,T,Ts,phi,t,PHI_psd);
+[X,X_delta,t_delta, X_t, t_conv, S_x] = A2(N,over,T,phi,t,PHI_psd);
 
 %A.3
 
-A3(X_t,Nf,Ts,t_conv,F_axis,N,over,phi,S_x);
+A3("3",X_t,Nf,T,t_conv,F_axis,N,over,phi,S_x);
 
 %A.4
 X4 = bits_to_4PAM(N/2);
@@ -59,3 +59,5 @@ DrawSeminology(F_axis,Sx_tests4,"Power Spectral Density", ...
 hold off;
 legend("Theoretical","Tests");
 
+%A5
+A3("5",X_t,Nf,2*T,t_conv,F_axis,N,2*over,phi,S_x);

@@ -1,4 +1,5 @@
-function [phi,t, PHI_psd, F_axis] = A1(T, over, A, a, Fs, Nf, Ts)
+function [phi,t, PHI_psd, F_axis] = A1(T, over, A, a, Fs, Nf)
+    Ts = T/over;
     [phi,t] = srrc_pulse(T,over,A,a);
     
     

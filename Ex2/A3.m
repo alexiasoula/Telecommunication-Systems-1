@@ -1,7 +1,9 @@
-function A3(X_t,Nf,Ts,t_conv,F_axis,N,over,phi,S_x)
+function A3(a,X_t,Nf,T,t_conv,F_axis,N,over,phi,S_x)
+    Ts = T / over; 
+
     Px_F = calculateP(X_t,Nf,Ts,t_conv);
     
-    figure(Name="A.3 P_x(F)");
+    figure(Name="A."+a+" P_x(F)");
     subplot(2,1,1);
     DrawPlot(F_axis,Px_F,"Px(F) of signal X(t)",'Frequency','Amlitude');
     
@@ -22,7 +24,7 @@ function A3(X_t,Nf,Ts,t_conv,F_axis,N,over,phi,S_x)
     
     Sx_tests = mean(X_tests);
     
-    figure(Name="A.3 After tests");
+    figure(Name="A."+a+" After tests");
     semilogy(F_axis,S_x,'b');
     hold on;
     semilogy(F_axis,Sx_tests,'r');

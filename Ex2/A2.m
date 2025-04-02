@@ -1,4 +1,6 @@
-function [X, X_delta,t_delta, X_t, t_conv, S_x] = A2(N,over,T,Ts,phi,t,PHI_psd)
+function [X, X_delta,t_delta, X_t, t_conv, S_x] = A2(N,over,T,phi,t,PHI_psd)
+    Ts = T / over;
+
     X = bits_to_2PAM(N);
     
     figure(Name="A.2 bits to 2 PAM");
