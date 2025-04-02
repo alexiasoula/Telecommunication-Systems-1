@@ -18,11 +18,11 @@ N = 100;
 
 %A.3
 
-A3("3",X_t,Nf,T,t_conv,F_axis,N,over,phi,S_x);
+A3("3",X_t,Nf,T,t_conv,F_axis,N,over,phi,t,S_x);
 
 %A.4
 X4 = bits_to_4PAM(N/2);
-X4_delta = 1/Ts*upsample(X, over);
+X4_delta = 1/Ts*upsample(X4, over);
 t4_delta = [0 : Ts : N/2 * T - Ts];
 X4_t = conv(X_delta,phi)*Ts;
 t4_conv = linspace(t(1)+t4_delta(1),t(end)+t4_delta(end),length(X4_t));
@@ -43,8 +43,10 @@ X_tests4 = zeros(k,Nf);
 for i=1:k
     X_test4 = bits_to_4PAM(N/2);
     X_delta_test4 = 1/Ts*upsample(X_test4, over);
+    t_Xdelta = [0:Ts:(N/2)*T-Ts];
     X_t_test4 = conv(X_delta_test4,phi)*Ts;
-    XF_psd_test4 = calculateP(X_t_test4,Nf,Ts,1);
+    t4_conv = [t(1)+t_Xdelta(1) : Ts : t(end)+t_Xdelta(end)];
+    XF_psd_test4 = calculateP(X_t_test4,Nf,Ts,t4_conv);
     X_tests4(i,:)=XF_psd_test4;
 end
 
@@ -60,4 +62,4 @@ hold off;
 legend("Theoretical","Tests");
 
 %A5
-A3("5",X_t,Nf,2*T,t_conv,F_axis,N,2*over,phi,S_x);
+A3("5",X_t,Nf,2*T,t_conv,F_axis,N,2*over,phi,t,S_x);

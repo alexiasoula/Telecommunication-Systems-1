@@ -1,4 +1,4 @@
-function A3(a,X_t,Nf,T,t_conv,F_axis,N,over,phi,S_x)
+function A3(a,X_t,Nf,T,t_conv,F_axis,N,over,phi,t,S_x)
     Ts = T / over; 
 
     Px_F = calculateP(X_t,Nf,Ts,t_conv);
@@ -17,8 +17,10 @@ function A3(a,X_t,Nf,T,t_conv,F_axis,N,over,phi,S_x)
     for i=1:k
         X_test = bits_to_2PAM(N);
         X_delta_test = 1/Ts*upsample(X_test, over);
+        t_Xdelta = [0:Ts:(N)*T-Ts];
         X_t_test = conv(X_delta_test,phi)*Ts;
-        XF_psd_test = calculateP(X_t_test,Nf,Ts,1);
+        t_conv = [t(1)+t_Xdelta(1) : Ts : t(end)+t_Xdelta(end)];
+        XF_psd_test = calculateP(X_t_test,Nf,Ts,t_conv);
         X_tests(i,:)=XF_psd_test;
     end
     
