@@ -62,4 +62,25 @@ hold off;
 legend("Theoretical","Tests");
 
 %A5
+[phi,t] = srrc_pulse(2*T,2*over,A,a);
 A3("5",X_t,Nf,2*T,t_conv,F_axis,N,2*over,phi,t,S_x);
+
+%Β
+A=4;
+F0 = 500;
+tB = linspace(-A,A,2*F0 );
+XB= randn(1,5);
+fi = 2*pi*rand(1,5);
+
+figure;
+hold on;
+for i=1:5
+Y = XB(i)*cos(2*pi*F0*tB+fi(i));
+plot(tB,Y);
+
+end
+grid on;
+hold off;
+xlabel("time axis");
+ylabel("Amplitude");
+title("Realizations of Y");
