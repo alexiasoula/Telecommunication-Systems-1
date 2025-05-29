@@ -1,3 +1,4 @@
+clear all; close all; clc;
 N     = 100;
 T     = 1e-2;
 over  = 10;
@@ -137,4 +138,11 @@ plot(fm, 10*log10(PyQ), 'r'); grid on;
 xlabel('Frequency (Hz)'); ylabel('PSD (dB/Hz)');
 title('Periodograms after matched filter');
 legend('y_I','y_Q');
+
+%11
+num_errors_sumbols = symbol_errors(Y_t,X_t)
+
+%12
+num_errors_bits_I = bit_errors(XI_up,yI)
+num_errors_bits_Q = bit_errors(XQ_up,yQ)
 
