@@ -165,10 +165,10 @@ grid on;
 
 %11
 [X_est, bit_seq_est] = detect_PSK_16(Y);
-num_errors_sumbols = symbol_errors(X_est,X)
+num_errors_sumbols = symbol_errors(X_est,X);
 
 %12
-num_errors_bits = bit_errors(bit_seq_est,bit_seq)
+num_errors_bits = bit_errors(bit_seq_est,bit_seq);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Monte Carlo 1
