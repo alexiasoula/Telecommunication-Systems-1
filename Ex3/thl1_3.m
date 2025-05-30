@@ -1,4 +1,5 @@
 clear all; close all; clc;
+A = 1 ;
 N     = 100;
 T     = 1e-2;
 over  = 10;
@@ -6,6 +7,7 @@ Ts    = T/over;
 Fs    = 1/Ts;
 beta  = 0.35;       % SRRC roll‑off factor
 span  = 6;          % Filter length in symbols
+roll = 0.5;
 F0 = 200; %4
 SNRdB = 15;   %7
 
@@ -15,23 +17,24 @@ XI      = X(1,:);          % {X_I,n}
 XQ      = X(2,:);          % {X_Q,n}
 
 % SRRC filter
-h_srrc = rcosdesign(beta, span, over, 'sqrt');
-
+[phi, t_phi] = srrc_pulse(T, over, A, roll);
 % Upsampling
-XI_up = upsample(XI, over);
-XQ_up = upsample(XQ, over);
+XI_up = (1/Ts)*upsample(XI, over);
+XQ_up = (1/Ts)*upsample(XQ, over);
 
+tx_delta_I = linspace(0, N*T, length(XI_up));
+tx_delta_Q = linspace(0, N*T, length(XQ_up)); % same duration
 % morfopiisi palmoy
-sI = conv(XI_up, h_srrc, 'same'); % I(t)
-sQ = conv(XQ_up, h_srrc, 'same'); % Q(t)
+sI = conv(XI_up, phi)* Ts; % I(t)
+sQ = conv(XQ_up, phi)* Ts; % Q(t)
 
 % time axes
-t = (0:length(sI)-1) * Ts;
+t_conv = [tx_delta_I(1) + t_phi(1) : Ts : tx_delta_I(end) + t_phi(end) - Ts];
 
 figure("Name","SRRC‑shaped Waveforms","NumberTitle","off");
 subplot(2,1,1)
-plot(t, sI, 'b'); hold on;
-plot(t, sQ, 'r');
+plot(t_conv, sI, 'b'); hold on;
+plot(t_conv, sQ, 'r');
 xlabel('Time (s)'); ylabel('Amplitude');
 title('Baseband waveforms after SRRC shaping');
 legend('s_I(t)','s_Q(t)'); grid on;
@@ -48,6 +51,7 @@ title('Periodograms of I and Q branches');
 legend('I‑branch','Q‑branch'); grid on;
 
 %4
+t = t_conv;
 carrier_cos = cos(2*pi*F0*t);
 carrier_sin = sin(2*pi*F0*t);
 
@@ -120,12 +124,12 @@ title('Periodograms');
 
 %9
 
-yI = conv(rxI, h_srrc, 'same')* Ts;
-yQ = conv(rxQ, h_srrc, 'same')* Ts;
-
+yI = conv(rxI, phi)* Ts;
+yQ = conv(rxQ, phi)* Ts;
+t_conv_new = t(1) + t_phi(1) : Ts : t(end) + t_phi(end);
 figure('Name','Receiver matched filter outputs');
 subplot(2,1,1);
-plot(t, yI, 'b'); hold on; plot(t, yQ, 'r');
+plot(t_conv_new, yI, 'b'); hold on; plot(t_conv_new, yQ, 'r');
 xlabel('Time (s)'); ylabel('Amplitude'); grid on;
 title('Outputs after matched SRRC filter');
 legend('y_I(t)','y_Q(t)');
@@ -140,13 +144,28 @@ title('Periodograms after matched filter');
 legend('y_I','y_Q');
 
 % A10 
+A = 1;
+idx_start = 2*A*over + 1;
+idx_end = idx_start + (N-1) * over;
 
-Y = [yI; yQ];
+idx = idx_start : over : idx_end;
+    
+
+YI_samples = yI(idx);
+YQ_samples = yQ(idx);
+
+Y = [YI_samples; YQ_samples];
+
+figure('Name','Scatterplot of received symbols');
+scatter(YI_samples, YQ_samples, 'filled');
+xlabel('In-phase'); ylabel('Quadrature');
+title('Scatterplot after matched filter and sampling');
+grid on;
 
 
 %11
 [X_est, bit_seq_est] = detect_PSK_16(Y);
-num_errors_sumbols = symbol_errors(X_est,X_t)
+num_errors_sumbols = symbol_errors(X_est,X)
 
 %12
 num_errors_bits = bit_errors(bit_seq_est,bit_seq)
