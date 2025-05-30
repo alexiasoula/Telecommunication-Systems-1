@@ -19,6 +19,6 @@ function X = bits_to_PSK_16(bit_seq)
 
     % 16-PSK
     theta = 2*pi * g / 16;                    % 1×N
-    X = [cos(theta);                           % 2×N
+    X = [cos(theta);                          % 2×N
          sin(theta)];
 end

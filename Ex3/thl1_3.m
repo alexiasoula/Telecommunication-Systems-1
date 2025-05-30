@@ -120,8 +120,8 @@ title('Periodograms');
 
 %9
 
-yI = conv(rxI, h_srrc, 'same');
-yQ = conv(rxQ, h_srrc, 'same');
+yI = conv(rxI, h_srrc, 'same')* Ts;
+yQ = conv(rxQ, h_srrc, 'same')* Ts;
 
 figure('Name','Receiver matched filter outputs');
 subplot(2,1,1);
@@ -139,10 +139,72 @@ xlabel('Frequency (Hz)'); ylabel('PSD (dB/Hz)');
 title('Periodograms after matched filter');
 legend('y_I','y_Q');
 
+% A10 
+
+Y = [yI; yQ];
+
+
 %11
-num_errors_sumbols = symbol_errors(Y_t,X_t)
+[X_est, bit_seq_est] = detect_PSK_16(Y);
+num_errors_sumbols = symbol_errors(X_est,X_t)
 
 %12
-num_errors_bits_I = bit_errors(XI_up,yI)
-num_errors_bits_Q = bit_errors(XQ_up,yQ)
+num_errors_bits = bit_errors(bit_seq_est,bit_seq)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Monte Carlo 1
+
+N = 100;           
+K = 1000;               
+SNRdB = -2:2:24;        
+
+numSNR = length(SNRdB);
+num_symbol_errors = zeros(1,numSNR);
+num_bit_errors = zeros(1,numSNR);
+
+for idx = 1:numSNR
+    snr = SNRdB(idx);
+    for k = 1:K
+        
+        bit_seq = generate_bits(N);     
+        X = bits_to_PSK_16(bit_seq);
+
+        sigma2_W = 1/(Ts*10^(snr/10));
+        sigma2_N = Ts*sigma2_W/2;
+        noise = sqrt(sigma2_N)*randn(size(X));
+        Y = X + noise;
+
+        [est_X, est_bit_seq] = detect_PSK_16(Y);
+
+        num_symbol_errors(idx) = num_symbol_errors(idx) + symbol_errors(est_X, X);
+        num_bit_errors(idx) = num_bit_errors(idx) + bit_errors(est_bit_seq, bit_seq);
+    end
+end
+
+Pe_symbol = num_symbol_errors/(K*N);
+Pe_bit = num_bit_errors/(K*4*N);
+
+figure;
+semilogy(SNRdB, Pe_symbol, 'o-');
+xlabel('SNR (dB)'); ylabel('Symbol Error Probability');
+title('Monte Carlo εκτίμηση Pe(symbol) για 16-PSK');
+grid on;
+
+
+%2
+M = 16;
+Pe_symbol_bound = 2*qfunc(sqrt(2*10.^(SNRdB/10))*sin(pi/M));
+hold on;
+semilogy(SNRdB, Pe_symbol_bound, 'r--');
+legend('Monte Carlo', 'Άνω φράγμα');
+
+%3
+Pe_bit_bound = Pe_symbol/log2(M);
+
+figure;
+semilogy(SNRdB, Pe_bit, 'o-'); hold on;
+semilogy(SNRdB, Pe_bit_bound, 'r--');
+xlabel('SNR (dB)'); ylabel('Bit Error Probability');
+title('Monte Carlo εκτίμηση Pe(bit) για 16-PSK');
+legend('Monte Carlo', 'Κάτω φράγμα');
+grid on;
